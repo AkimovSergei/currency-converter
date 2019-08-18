@@ -10,6 +10,11 @@ Modify .env, add converter api key
 CURRENCY_CONVERTER_API_KEY=912ab7a1c2e95bb2c28b
 ```
 
+Install dependencies
+```
+composer install
+```
+
 
 Create database
 ```
