@@ -1,0 +1,29 @@
+{
+  "name": "sa/currency-converter",
+  "description": "Currency converter",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sergii Akimov",
+      "email": "akimovpost@icloud.com"
+    }
+  ],
+  "require": {
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5"
+  },
+  "autoload": {
+    "psr-4": {
+      "CurrencyConverter\\": "src/CurrencyConverter"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  }
+}
