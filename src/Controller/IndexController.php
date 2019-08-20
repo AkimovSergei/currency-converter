@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Repository\ConvertHistoryRepository;
-use CurrencyConverter\Currencies;
-use CurrencyConverter\CurrenciesProviders\RestCountriesProvider\RestCountryProvider;
-use CurrencyConverter\CurrencyConverter;
-use CurrencyConverter\Providers\CurrencyConverterApi\Provider as CurrencyConverterApiProvider;
+use App\Services\Helpers;
+use CurrencyConverter\CountriesService;
+use CurrencyConverter\CurrencyConverterService;
+use CurrencyConverter\CurrencyConvertion;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -31,13 +31,12 @@ class IndexController extends AbstractController
      * Search city
      *
      * @param Request $request
+     * @param CountriesService $countriesService
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function searchCity(Request $request)
+    public function searchCity(Request $request, CountriesService $countriesService)
     {
-        $currenciesService = new Currencies(new RestCountryProvider);
-
-        $currencies = $currenciesService->fetchCurrencies(
+        $currencies = $countriesService->fetchCurrencies(
             $request->query->get('city')
         );
 
@@ -47,9 +46,19 @@ class IndexController extends AbstractController
     /**
      * Convert amount
      *
+     * @param Request $request
+     * @param ValidatorInterface $validator
+     * @param ConvertHistoryRepository $convertHistoryRepository
+     * @param CurrencyConverterService $currencyConverterService
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function convert(Request $request, ValidatorInterface $validator, ConvertHistoryRepository $convertHistoryRepository)
+    public function convert(
+        Request $request,
+        ValidatorInterface $validator,
+        ConvertHistoryRepository $convertHistoryRepository,
+        CurrencyConverterService $currencyConverterService,
+        Helpers $helpers
+    )
     {
         $constraints = new Assert\Collection([
             'fields' => [
@@ -77,30 +86,25 @@ class IndexController extends AbstractController
         if (0 < $violations->count()) {
             return $this->json(['error' => 'Validation failed'], 400);
         }
-
-        $converter = new CurrencyConverter(
-            new CurrencyConverterApiProvider(
-                $this->getParameter('currency_converter.currency_converter_api_secret')
-            )
-        );
-
-        $amount = $converter->convert(
+        
+        /** @var CurrencyConvertion $convertion */
+        $convertion = $currencyConverterService->convert(
             $input['from']['currency'],
             $input['to']['currency'],
-            $input['from']['amount']
+            $helpers->parseMoney($input['from']['amount'])
         );
 
         // Save
         $convertHistoryRepository->save(
-            $input['from']['currency'],
-            $input['from']['amount'],
-            $input['to']['currency'],
-            $amount,
+            $convertion->getCurrencyFrom(),
+            $convertion->getAmountFrom(),
+            $convertion->getCurrencyTo(),
+            $convertion->getAmountTo(),
             $input['capital'] ?? '',
             $input['country'] ?? ''
         );
 
-        return $this->json(['amount' => $amount]);
+        return $this->json(['amount' => $convertion->getAmountTo()]);
     }
 
 }

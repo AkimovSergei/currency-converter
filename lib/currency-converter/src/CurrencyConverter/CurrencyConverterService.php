@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CurrencyConverter;
 
-use CurrencyConverter\Providers\ProviderInterface;
+use CurrencyConverter\CurrencyConverterProviders\ProviderInterface;
 
 /**
  * Class Converter
  * @package CurrencyConverter
  */
-class CurrencyConverter
+class CurrencyConverterService
 {
 
     /** @var ProviderInterface */
@@ -33,9 +35,9 @@ class CurrencyConverter
 
     /**
      * @param ProviderInterface $provider
-     * @return CurrencyConverter
+     * @return CurrencyConverterService
      */
-    public function setProvider(ProviderInterface $provider): CurrencyConverter
+    public function setProvider(ProviderInterface $provider): CurrencyConverterService
     {
         $this->provider = $provider;
 
@@ -47,10 +49,10 @@ class CurrencyConverter
      *
      * @param string $fromCurrency
      * @param string $toCurrency
-     * @param $amount
-     * @return mixed
+     * @param float $amount
+     * @return CurrencyConvertion
      */
-    public function convert(string $fromCurrency, string $toCurrency, $amount)
+    public function convert(string $fromCurrency, string $toCurrency, float $amount): CurrencyConvertion
     {
         return $this->getProvider()->convert($fromCurrency, $toCurrency, $amount);
     }

@@ -1,15 +1,17 @@
 <?php
 
-namespace CurrencyConverter\CurrenciesProviders\RestCountriesProvider;
+declare(strict_types=1);
 
+namespace CurrencyConverter\CountriesProviders\RestCountriesProvider;
 
 /**
  * Class Api
- * @package CurrencyConverter\CurrencyProviders\RestCountriesProvider
+ * @package CurrencyConverter\CountriesProviders\RestCountriesProvider
  */
 class Api
 {
 
+    /** @var string API Endpoint */
     const ENDPOINT = 'https://restcountries.eu/rest/v2';
 
     /**
@@ -25,6 +27,13 @@ class Api
         return $this->request($endpoint);
     }
 
+    /**
+     * Find country by capital name
+     *
+     * @param $city
+     * @param array $filters
+     * @return mixed
+     */
     public function findCapital($city, array $filters = [])
     {
         $endpoint = $this->getEndpoint('/capital/' . urlencode(mb_strtolower($city)), $filters);

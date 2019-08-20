@@ -1,15 +1,17 @@
 <?php
 
-namespace CurrencyConverter\CurrenciesProviders\RestCountriesProvider;
+declare(strict_types=1);
 
-use CurrencyConverter\CurrenciesProviders\CurrencyProviderInterface;
+namespace CurrencyConverter\CountriesProviders\RestCountriesProvider;
+
+use CurrencyConverter\CountriesProviders\CountriesProviderInterface;
 
 /**
  * Class RestCountryProvider
- * @package CurrencyConverter\CurrencyProviders\RestCountriesProvider
+ * @package CurrencyConverter\CountriesProviders\RestCountriesProvider
  */
 class RestCountryProvider
-    implements CurrencyProviderInterface
+    implements CountriesProviderInterface
 {
 
     /** @var Api */
@@ -17,10 +19,11 @@ class RestCountryProvider
 
     /**
      * RestCountryProvider constructor.
+     * @param Api $api
      */
-    public function __construct()
+    public function __construct(Api $api)
     {
-        $this->api = new Api;
+        $this->api = $api;
     }
 
     /**
@@ -29,7 +32,7 @@ class RestCountryProvider
      * @param string $city
      * @return array
      */
-    public function getCurrenciesList(string $city = '')
+    public function getCurrenciesList(string $city = ''): array
     {
 
         $filters = [

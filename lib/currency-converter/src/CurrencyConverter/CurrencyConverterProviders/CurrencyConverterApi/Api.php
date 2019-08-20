@@ -1,18 +1,18 @@
 <?php
 
-namespace CurrencyConverter\Providers\CurrencyLayer;
+declare(strict_types=1);
 
-use CurrencyConverter\Providers\CurrencyLayer\Exceptions\ConvertionException;
+namespace CurrencyConverter\CurrencyConverterProviders\CurrencyConverterApi;
+
+use CurrencyConverter\CurrencyConverterProviders\CurrencyConverterApi\Exceptions\ConvertionException;
 
 /**
  * Class Api
- *
- * @package CurrencyConverter\Providers\CurrencyLayer
  */
 class Api
 {
 
-    const HOST = 'apilayer.net/api';
+    const HOST = 'https://free.currconv.com';
 
     /** @var string Api access key */
     protected $accessKey;
@@ -44,46 +44,44 @@ class Api
     }
 
     /**
-     * Conversion exceptions
+     * Convert
      *
      * @param string $fromCurrency
      * @param string $toCurrency
      * @param $amount
-     * @return mixed
+     * @return float|int
      * @throws ConvertionException
      */
-    public function convert(string $fromCurrency, string $toCurrency, $amount)
+    public function convert(string $fromCurrency, string $toCurrency, $amount): float
     {
-        $endpoint = $this->getEndpoint('convert', [
-            'access_key' => $this->getAccessKey(),
-            'from' => $fromCurrency,
-            'to' => $toCurrency,
-            'amount' => $amount,
+        $currencyId = $fromCurrency . '_' . $toCurrency;
+
+        $endpoint = $this->getEndpoint([
+            'apiKey' => $this->getAccessKey(),
+            'q' => $currencyId,
         ]);
 
         $conversionResult = $this->request($endpoint);
 
-        if (!isset($conversionResult['result'])) {
-            throw new ConvertionException("Convertion exception");
+        if (!isset($conversionResult['results'][$currencyId])) {
+            throw new ConvertionException('Convertion exception');
         }
 
-        return $conversionResult['result'];
+        $rate = $conversionResult['results'][$currencyId]['val'] ?? 0;
+
+        return $amount * $rate;
     }
 
     /**
      * Generate endpoint
      *
-     * @param string $method
      * @param array $params
-     * @param bool $useHttps
      * @return string
      */
-    public function getEndpoint(string $method, array $params = [], bool $useHttps = false): string
+    public function getEndpoint(array $params = []): string
     {
         // https is not available for free plan
-        $endpoint = $useHttps ? 'https://' : 'http://';
-
-        $endpoint .= static::HOST . '/' . $method;
+        $endpoint = static::HOST . '/api/v7/convert';
 
         if (!empty($params)) {
             $endpoint .= '?' . http_build_query($params);
