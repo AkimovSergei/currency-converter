@@ -86,7 +86,7 @@ class IndexController extends AbstractController
         if (0 < $violations->count()) {
             return $this->json(['error' => 'Validation failed'], 400);
         }
-        
+
         /** @var CurrencyConvertion $convertion */
         $convertion = $currencyConverterService->convert(
             $input['from']['currency'],
